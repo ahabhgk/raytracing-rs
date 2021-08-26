@@ -1,3 +1,4 @@
+use crate::v3;
 use std::ops;
 
 #[derive(Default, Clone, Copy)]
@@ -93,6 +94,22 @@ impl ops::Mul for Vec3 {
     }
 }
 
+impl ops::Mul<f64> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        self * v3!(rhs)
+    }
+}
+
+impl ops::Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        v3!(self) * rhs
+    }
+}
+
 impl ops::Div for Vec3 {
     type Output = Self;
 
@@ -102,6 +119,22 @@ impl ops::Div for Vec3 {
             y: self.y / rhs.y,
             z: self.z / rhs.z,
         }
+    }
+}
+
+impl ops::Div<f64> for Vec3 {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        self / v3!(rhs)
+    }
+}
+
+impl ops::Div<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn div(self, rhs: Vec3) -> Self::Output {
+        v3!(self) / rhs
     }
 }
 
@@ -155,10 +188,10 @@ pub type Point = Vec3;
 #[macro_export]
 macro_rules! v3 {
     ($f: expr) => {
-        Vec3::from($f)
+        $crate::Vec3::from(f64::from($f))
     };
     ($x: expr, $y: expr, $z: expr) => {
-        Vec3::new($x, $y, $z)
+        $crate::Vec3::new(f64::from($x), f64::from($y), f64::from($z))
     };
 }
 
