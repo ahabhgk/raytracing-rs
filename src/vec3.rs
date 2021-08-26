@@ -1,7 +1,7 @@
-use crate::v3;
+use crate::{helpers::clamp, v3};
 use std::ops;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -37,13 +37,17 @@ impl Vec3 {
         *self / Vec3::from(self.len())
     }
 
-    pub fn write(&self) {
-        let num = 255.999;
+    pub fn write(&self, samples_per_pixel: i32) {
+        let num = 256.0;
+        let r = self.x / f64::from(samples_per_pixel);
+        let g = self.y / f64::from(samples_per_pixel);
+        let b = self.z / f64::from(samples_per_pixel);
+
         println!(
             "{} {} {}",
-            (num * self.x) as i32,
-            (num * self.y) as i32,
-            (num * self.z) as i32
+            (num * clamp(r, 0.0, 0.999)) as i32,
+            (num * clamp(g, 0.0, 0.999)) as i32,
+            (num * clamp(b, 0.0, 0.999)) as i32
         );
     }
 }
