@@ -1,10 +1,10 @@
-use std::ops::{self, Deref};
+use std::ops;
 
 #[derive(Default, Clone, Copy)]
 pub struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
@@ -21,7 +21,7 @@ impl Vec3 {
     }
 
     pub fn dot(&self, v: &Self) -> f64 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.x * v.x + self.y * v.y + self.z * v.z
     }
 
     pub fn cross(&self, v: &Self) -> Self {
@@ -32,8 +32,18 @@ impl Vec3 {
         }
     }
 
-    pub fn unit(self) -> Self {
-        self / Vec3::from(self.len())
+    pub fn unit(&self) -> Self {
+        *self / Vec3::from(self.len())
+    }
+
+    pub fn write(&self) {
+        let num = 255.999;
+        println!(
+            "{} {} {}",
+            (num * self.x) as i32,
+            (num * self.y) as i32,
+            (num * self.z) as i32
+        );
     }
 }
 
@@ -140,30 +150,4 @@ impl ops::DivAssign for Vec3 {
 }
 
 pub type Point = Vec3;
-
-#[derive(Default)]
-pub struct Color(Vec3);
-
-impl Color {
-    pub fn new(r: f64, g: f64, b: f64) -> Self {
-        Self(Vec3::new(r, g, b))
-    }
-
-    pub fn write(&self) {
-        let num = 255.999;
-        println!(
-            "{} {} {}",
-            (num * self.x) as i32,
-            (num * self.y) as i32,
-            (num * self.z) as i32
-        );
-    }
-}
-
-impl Deref for Color {
-    type Target = Vec3;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+pub type Color = Vec3;
