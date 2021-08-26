@@ -149,5 +149,29 @@ impl ops::DivAssign for Vec3 {
     }
 }
 
-pub type Point = Vec3;
 pub type Color = Vec3;
+pub type Point = Vec3;
+
+#[macro_export]
+macro_rules! v3 {
+    ($f: expr) => {
+        Vec3::from($f)
+    };
+    ($x: expr, $y: expr, $z: expr) => {
+        Vec3::new($x, $y, $z)
+    };
+}
+
+#[macro_export]
+macro_rules! color {
+    ($($e: expr),*) => {
+        v3!($($e),*)
+    };
+}
+
+#[macro_export]
+macro_rules! point {
+    ($($e: expr),*) => {
+        v3!($($e),*)
+    };
+}

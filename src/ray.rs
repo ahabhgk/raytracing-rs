@@ -1,4 +1,7 @@
-use crate::vec3::{Point, Vec3};
+use crate::{
+    v3,
+    vec3::{Point, Vec3},
+};
 
 pub struct Ray<'a> {
     pub origin: &'a Point,
@@ -11,6 +14,6 @@ impl<'a> Ray<'a> {
     }
 
     pub fn at(&self, distance: f64) -> Point {
-        *self.origin + *self.direction * Vec3::from(distance)
+        *self.origin + *self.direction * v3!(distance)
     }
 }
