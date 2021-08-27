@@ -1,5 +1,6 @@
 use crate::{
     hit::{Hit, HitRecord},
+    material::Material,
     ray::Ray,
     v3,
     vec3::Point,
@@ -8,11 +9,16 @@ use crate::{
 pub struct Sphere {
     center: Point,
     radius: f64,
+    material: Material,
 }
 
 impl Sphere {
-    pub fn new(center: Point, radius: f64) -> Self {
-        Self { center, radius }
+    pub fn new(center: Point, radius: f64, material: Material) -> Self {
+        Self {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -30,11 +36,11 @@ impl Hit for Sphere {
             if t1 < t_max && t1 > t_min {
                 let p = ray.at(t1);
                 let n = (p - self.center) / v3!(self.radius);
-                Some(HitRecord::new(ray, p, t1, n))
+                Some(HitRecord::new(ray, p, t1, n, &self.material))
             } else if t2 < t_max && t2 > t_min {
                 let p = ray.at(t2);
                 let n = (p - self.center) / v3!(self.radius);
-                Some(HitRecord::new(ray, p, t2, n))
+                Some(HitRecord::new(ray, p, t2, n, &self.material))
             } else {
                 None
             }

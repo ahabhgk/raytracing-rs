@@ -1,24 +1,35 @@
-use std::rc::Rc;
-
 use crate::{
+    material::Material,
     ray::Ray,
     vec3::{Point, Vec3},
 };
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     pub point: Point,
     pub t: f64,
     pub normal: Vec3,
+    pub material: &'a Material,
 }
 
-impl HitRecord {
-    pub fn new(ray: &Ray, point: Point, t: f64, outward_normal: Vec3) -> Self {
+impl<'a> HitRecord<'a> {
+    pub fn new(
+        ray: &Ray,
+        point: Point,
+        t: f64,
+        outward_normal: Vec3,
+        material: &'a Material,
+    ) -> Self {
         let normal = if ray.direction.dot(&outward_normal) < 0.0 {
             outward_normal
         } else {
             -outward_normal
         };
-        Self { point, t, normal }
+        Self {
+            point,
+            t,
+            normal,
+            material,
+        }
     }
 }
 
@@ -27,7 +38,7 @@ pub trait Hit {
 }
 
 pub struct HitList {
-    objects: Vec<Rc<dyn Hit>>,
+    objects: Vec<Box<dyn Hit>>,
 }
 
 impl HitList {
@@ -37,7 +48,7 @@ impl HitList {
         }
     }
 
-    pub fn add(&mut self, object: Rc<dyn Hit>) {
+    pub fn add(&mut self, object: Box<dyn Hit>) {
         self.objects.push(object);
     }
 

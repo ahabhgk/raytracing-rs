@@ -1,6 +1,7 @@
 mod camera;
 mod helpers;
 mod hit;
+mod material;
 mod ray;
 mod sphere;
 mod vec3;
@@ -8,10 +9,10 @@ mod vec3;
 use crate::camera::Camera;
 use crate::helpers::random;
 use crate::hit::{Hit, HitList};
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::{Color, Vec3};
-use std::rc::Rc;
 
 fn ray_color<H>(ray: &Ray, world: &H, depth: i32) -> Color
 where
@@ -21,8 +22,10 @@ where
         return color!(0, 0, 0);
     }
     if let Some(rec) = world.hit(ray, 0.001, f64::INFINITY) {
-        let target = rec.point + rec.normal + Vec3::random_in_hemisphere(&rec.normal);
-        return 0.5 * ray_color(&Ray::new(rec.point, target - rec.point), world, depth - 1);
+        if let Some((ray_out, attenuation)) = rec.material.scatter(ray, &rec) {
+            return attenuation * ray_color(&ray_out, world, depth - 1);
+        }
+        return color!(0);
     }
     let unit_dir = ray.direction.unit();
     let t = 0.5 * (unit_dir.y + 1.0);
@@ -39,8 +42,16 @@ fn main() {
 
     // World
     let mut world = HitList::new();
-    world.add(Rc::new(Sphere::new(point!(0, 0, -1), 0.5)));
-    world.add(Rc::new(Sphere::new(point!(0, -100.5, -1), 100.0)));
+
+    let ground = Material::lambertian(color!(0.8, 0.8, 0));
+    let center = Material::lambertian(color!(0.7, 0.3, 0.3));
+    let left = Material::metal(color!(0.8), 0.3);
+    let right = Material::metal(color!(0.8, 0.6, 0.2), 1.0);
+
+    world.add(Box::new(Sphere::new(point!(0, -100.5, -1), 100.0, ground)));
+    world.add(Box::new(Sphere::new(point!(0, 0, -1), 0.5, center)));
+    world.add(Box::new(Sphere::new(point!(-1, 0, -1), 0.5, left)));
+    world.add(Box::new(Sphere::new(point!(1, 0, -1), 0.5, right)));
 
     // Camera
     let camera = Camera::new(aspect_ratio);

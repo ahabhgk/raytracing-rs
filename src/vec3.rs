@@ -81,6 +81,15 @@ impl Vec3 {
             -in_unit_sphere
         }
     }
+
+    pub fn is_near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+
+    pub fn reflect(&self, v: &Self) -> Self {
+        *self - 2.0 * self.dot(v) * *v
+    }
 }
 
 impl From<f64> for Vec3 {
