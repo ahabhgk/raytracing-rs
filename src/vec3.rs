@@ -1,4 +1,8 @@
-use crate::{helpers::clamp, v3};
+use crate::{
+    helpers::{clamp, random_in},
+    v3,
+};
+use rand::{distributions::Standard, prelude::Distribution, Rng};
 use std::ops;
 
 #[derive(Default, Clone, Copy, Debug)]
@@ -39,9 +43,13 @@ impl Vec3 {
 
     pub fn write(&self, samples_per_pixel: i32) {
         let num = 256.0;
-        let r = self.x / f64::from(samples_per_pixel);
-        let g = self.y / f64::from(samples_per_pixel);
-        let b = self.z / f64::from(samples_per_pixel);
+        let mut r = self.x / f64::from(samples_per_pixel);
+        let mut g = self.y / f64::from(samples_per_pixel);
+        let mut b = self.z / f64::from(samples_per_pixel);
+
+        r = r.sqrt();
+        g = g.sqrt();
+        b = b.sqrt();
 
         println!(
             "{} {} {}",
@@ -49,6 +57,29 @@ impl Vec3 {
             (num * clamp(g, 0.0, 0.999)) as i32,
             (num * clamp(b, 0.0, 0.999)) as i32
         );
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = random_in::<Self>(v3!(-1), v3!(1));
+            if p.len_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
+    }
+
+    pub fn random_unit_vector() -> Self {
+        Self::random_in_unit_sphere().unit()
+    }
+
+    pub fn random_in_hemisphere(normal: &Self) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere();
+        if in_unit_sphere.dot(normal) > 0.0 {
+            in_unit_sphere
+        } else {
+            -in_unit_sphere
+        }
     }
 }
 
@@ -183,6 +214,16 @@ impl ops::DivAssign for Vec3 {
         self.x /= rhs.x;
         self.y /= rhs.y;
         self.z /= rhs.z;
+    }
+}
+
+impl Distribution<Vec3> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
+        Vec3 {
+            x: rng.gen(),
+            y: rng.gen(),
+            z: rng.gen(),
+        }
     }
 }
 

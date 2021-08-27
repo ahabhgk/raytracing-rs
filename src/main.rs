@@ -6,19 +6,23 @@ mod sphere;
 mod vec3;
 
 use crate::camera::Camera;
+use crate::helpers::random;
 use crate::hit::{Hit, HitList};
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::{Color, Vec3};
-use rand::random;
 use std::rc::Rc;
 
-fn ray_color<H>(ray: &Ray, world: &H) -> Color
+fn ray_color<H>(ray: &Ray, world: &H, depth: i32) -> Color
 where
     H: Hit,
 {
-    if let Some(rec) = world.hit(ray, 0.0, f64::INFINITY) {
-        return 0.5 * (rec.normal + color!(1, 1, 1));
+    if depth <= 0 {
+        return color!(0, 0, 0);
+    }
+    if let Some(rec) = world.hit(ray, 0.001, f64::INFINITY) {
+        let target = rec.point + rec.normal + Vec3::random_in_hemisphere(&rec.normal);
+        return 0.5 * ray_color(&Ray::new(rec.point, target - rec.point), world, depth - 1);
     }
     let unit_dir = ray.direction.unit();
     let t = 0.5 * (unit_dir.y + 1.0);
@@ -31,6 +35,7 @@ fn main() {
     let image_width = 400.0;
     let image_height = image_width / aspect_ratio;
     let samples_per_pixel = 100;
+    let max_depth = 50;
 
     // World
     let mut world = HitList::new();
@@ -50,7 +55,7 @@ fn main() {
                 let u = (i as f64 + random::<f64>()) / (image_width - 1.0);
                 let v = (j as f64 + random::<f64>()) / (image_height - 1.0);
                 let ray = camera.get_ray(u, v);
-                pixel_color += ray_color(&ray, &world);
+                pixel_color += ray_color(&ray, &world, max_depth);
             }
             pixel_color.write(samples_per_pixel);
         }
