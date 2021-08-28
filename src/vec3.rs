@@ -1,9 +1,15 @@
-use crate::{
-    helpers::{clamp, random_in},
-    v3,
-};
-use rand::{distributions::Standard, prelude::Distribution, Rng};
+use crate::{random::Random, v3};
 use std::ops;
+
+pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
+    if x < min {
+        min
+    } else if x > max {
+        max
+    } else {
+        x
+    }
+}
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Vec3 {
@@ -61,11 +67,10 @@ impl Vec3 {
 
     pub fn random_in_unit_sphere() -> Self {
         loop {
-            let p = random_in::<Self>(v3!(-1), v3!(1));
-            if p.len_squared() >= 1.0 {
-                continue;
+            let p = Self::random_in(v3!(-1), v3!(1));
+            if p.len_squared() < 1.0 {
+                return p;
             }
-            return p;
         }
     }
 
@@ -79,6 +84,15 @@ impl Vec3 {
             in_unit_sphere
         } else {
             -in_unit_sphere
+        }
+    }
+
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = v3!(f64::random_in(-1.0, 1.0), f64::random_in(-1.0, 1.0), 0);
+            if p.len_squared() < 1.0 {
+                return p;
+            }
         }
     }
 
@@ -121,6 +135,22 @@ impl ops::Add for Vec3 {
     }
 }
 
+impl ops::Add<f64> for Vec3 {
+    type Output = Self;
+
+    fn add(self, rhs: f64) -> Self::Output {
+        self + v3!(rhs)
+    }
+}
+
+impl ops::Add<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        v3!(self) + rhs
+    }
+}
+
 impl ops::Sub for Vec3 {
     type Output = Self;
 
@@ -130,6 +160,22 @@ impl ops::Sub for Vec3 {
             y: self.y - rhs.y,
             z: self.z - rhs.z,
         }
+    }
+}
+
+impl ops::Sub<f64> for Vec3 {
+    type Output = Self;
+
+    fn sub(self, rhs: f64) -> Self::Output {
+        self - v3!(rhs)
+    }
+}
+
+impl ops::Sub<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        v3!(self) - rhs
     }
 }
 
@@ -233,13 +279,17 @@ impl ops::DivAssign for Vec3 {
     }
 }
 
-impl Distribution<Vec3> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
-        Vec3 {
-            x: rng.gen(),
-            y: rng.gen(),
-            z: rng.gen(),
+impl Random for Vec3 {
+    fn random() -> Self {
+        Self {
+            x: rand::random(),
+            y: rand::random(),
+            z: rand::random(),
         }
+    }
+
+    fn random_in(min: Self, max: Self) -> Self {
+        min + (max - min) * Self::random()
     }
 }
 

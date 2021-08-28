@@ -1,15 +1,15 @@
 mod camera;
-mod helpers;
 mod hit;
 mod material;
+mod random;
 mod ray;
 mod sphere;
 mod vec3;
 
 use crate::camera::Camera;
-use crate::helpers::random;
 use crate::hit::{Hit, HitList};
 use crate::material::Material;
+use crate::random::Random;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::{Color, Vec3};
@@ -55,12 +55,21 @@ fn main() {
     world.add(Box::new(Sphere::new(point!(1, 0, -1), 0.5, right)));
 
     // Camera
+    let look_from = point!(3, 3, 2);
+    let look_at = point!(0, 0, -1);
+    let up = v3!(0, 1, 0);
+    let vertical = 20.0;
+    let aperture = 2.0;
+    let focus_distance = (look_from - look_at).len();
+
     let camera = Camera::new(
-        point!(-2, 2, 1),
-        point!(0, 0, -1),
-        v3!(0, 1, 0),
-        20.0,
+        look_from,
+        look_at,
+        up,
+        vertical,
         aspect_ratio,
+        aperture,
+        focus_distance,
     );
 
     // Render
@@ -70,8 +79,8 @@ fn main() {
         for i in 0..(image_width as i32) {
             let mut pixel_color = color!(0, 0, 0);
             for _ in 0..samples_per_pixel {
-                let u = (i as f64 + random::<f64>()) / (image_width - 1.0);
-                let v = (j as f64 + random::<f64>()) / (image_height - 1.0);
+                let u = (i as f64 + f64::random()) / (image_width - 1.0);
+                let v = (j as f64 + f64::random()) / (image_height - 1.0);
                 let ray = camera.get_ray(u, v);
                 pixel_color += ray_color(&ray, &world, max_depth);
             }
