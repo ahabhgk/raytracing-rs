@@ -43,14 +43,15 @@ fn main() {
     // World
     let mut world = HitList::new();
 
-    let ground = Material::lambertian(color!(0.8, 0.8, 0));
-    let center = Material::lambertian(color!(0.7, 0.3, 0.3));
-    let left = Material::metal(color!(0.8), 0.3);
-    let right = Material::metal(color!(0.8, 0.6, 0.2), 1.0);
+    let ground = Material::new_lambertian(color!(0.8, 0.8, 0));
+    let center = Material::new_lambertian(color!(0.1, 0.2, 0.5));
+    let left = Material::new_dielectric(1.5);
+    let right = Material::new_metal(color!(0.8, 0.6, 0.2), 0.0);
 
     world.add(Box::new(Sphere::new(point!(0, -100.5, -1), 100.0, ground)));
     world.add(Box::new(Sphere::new(point!(0, 0, -1), 0.5, center)));
-    world.add(Box::new(Sphere::new(point!(-1, 0, -1), 0.5, left)));
+    world.add(Box::new(Sphere::new(point!(-1, 0, -1), 0.5, left.clone())));
+    world.add(Box::new(Sphere::new(point!(-1, 0, -1), -0.4, left)));
     world.add(Box::new(Sphere::new(point!(1, 0, -1), 0.5, right)));
 
     // Camera

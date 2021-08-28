@@ -90,6 +90,13 @@ impl Vec3 {
     pub fn reflect(&self, v: &Self) -> Self {
         *self - 2.0 * self.dot(v) * *v
     }
+
+    pub fn refract(&self, v: &Vec3, etai_over_etat: f64) -> Self {
+        let cos_theta = ((-*self).dot(v)).min(1.0);
+        let r_out_perp = etai_over_etat * (*self + cos_theta * *v);
+        let r_out_parallel = -(1.0 - r_out_perp.len_squared()).abs().sqrt() * *v;
+        r_out_perp + r_out_parallel
+    }
 }
 
 impl From<f64> for Vec3 {
@@ -252,13 +259,13 @@ macro_rules! v3 {
 #[macro_export]
 macro_rules! color {
     ($($e: expr),*) => {
-        v3!($($e),*)
+        $crate::v3!($($e),*)
     };
 }
 
 #[macro_export]
 macro_rules! point {
     ($($e: expr),*) => {
-        v3!($($e),*)
+        $crate::v3!($($e),*)
     };
 }

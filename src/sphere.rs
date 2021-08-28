@@ -5,15 +5,16 @@ use crate::{
     v3,
     vec3::Point,
 };
+use std::rc::Rc;
 
 pub struct Sphere {
     center: Point,
     radius: f64,
-    material: Material,
+    material: Rc<Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Point, radius: f64, material: Material) -> Self {
+    pub fn new(center: Point, radius: f64, material: Rc<Material>) -> Self {
         Self {
             center,
             radius,

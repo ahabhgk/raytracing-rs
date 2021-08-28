@@ -9,6 +9,7 @@ pub struct HitRecord<'a> {
     pub t: f64,
     pub normal: Vec3,
     pub material: &'a Material,
+    pub is_front_face: bool,
 }
 
 impl<'a> HitRecord<'a> {
@@ -19,7 +20,8 @@ impl<'a> HitRecord<'a> {
         outward_normal: Vec3,
         material: &'a Material,
     ) -> Self {
-        let normal = if ray.direction.dot(&outward_normal) < 0.0 {
+        let is_front_face = ray.direction.dot(&outward_normal) < 0.0;
+        let normal = if is_front_face {
             outward_normal
         } else {
             -outward_normal
@@ -29,6 +31,7 @@ impl<'a> HitRecord<'a> {
             t,
             normal,
             material,
+            is_front_face,
         }
     }
 }
