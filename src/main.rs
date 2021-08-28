@@ -8,11 +8,55 @@ mod vec3;
 
 use crate::camera::Camera;
 use crate::hit::{Hit, HitList};
-use crate::material::Material;
 use crate::random::Random;
 use crate::ray::Ray;
-use crate::sphere::Sphere;
 use crate::vec3::{Color, Vec3};
+
+// Image
+const ASPECT_RATIO: f64 = 3.0 / 2.0;
+const IMAGE_WIDTH: f64 = 1200.0;
+const IMAGE_HEIGHT: f64 = IMAGE_WIDTH / ASPECT_RATIO;
+const SAMPLES_PER_PIXEL: i32 = 500;
+const MAX_DEPTH: i32 = 50;
+
+fn main() {
+    // World
+    let world = HitList::random_scene();
+
+    // Camera
+    let look_from = point!(13, 2, 3);
+    let look_at = point!(0, 0, 0);
+    let up = v3!(0, 1, 0);
+    let vertical = 20.0;
+    let aperture = 0.1;
+    let focus_distance = 10.0;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        up,
+        vertical,
+        ASPECT_RATIO,
+        aperture,
+        focus_distance,
+    );
+
+    // Render
+    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
+    for j in (0..(IMAGE_HEIGHT as i32)).rev() {
+        eprintln!("\rScanlines remaining: {} ", j);
+        for i in 0..(IMAGE_WIDTH as i32) {
+            let mut pixel_color = color!(0, 0, 0);
+            for _ in 0..SAMPLES_PER_PIXEL {
+                let u = (i as f64 + f64::random()) / (IMAGE_WIDTH - 1.0);
+                let v = (j as f64 + f64::random()) / (IMAGE_HEIGHT - 1.0);
+                let ray = camera.get_ray(u, v);
+                pixel_color += ray_color(&ray, &world, MAX_DEPTH);
+            }
+            pixel_color.write(SAMPLES_PER_PIXEL);
+        }
+    }
+}
 
 fn ray_color<H>(ray: &Ray, world: &H, depth: i32) -> Color
 where
@@ -30,61 +74,4 @@ where
     let unit_dir = ray.direction.unit();
     let t = 0.5 * (unit_dir.y + 1.0);
     (1.0 - t) * color!(1, 1, 1) + t * color!(0.5, 0.7, 1)
-}
-
-fn main() {
-    // Image
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400.0;
-    let image_height = image_width / aspect_ratio;
-    let samples_per_pixel = 100;
-    let max_depth = 50;
-
-    // World
-    let mut world = HitList::new();
-
-    let ground = Material::new_lambertian(color!(0.8, 0.8, 0));
-    let center = Material::new_lambertian(color!(0.1, 0.2, 0.5));
-    let left = Material::new_dielectric(1.5);
-    let right = Material::new_metal(color!(0.8, 0.6, 0.2), 0.0);
-
-    world.add(Box::new(Sphere::new(point!(0, -100.5, -1), 100.0, ground)));
-    world.add(Box::new(Sphere::new(point!(0, 0, -1), 0.5, center)));
-    world.add(Box::new(Sphere::new(point!(-1, 0, -1), 0.5, left.clone())));
-    world.add(Box::new(Sphere::new(point!(-1, 0, -1), -0.45, left)));
-    world.add(Box::new(Sphere::new(point!(1, 0, -1), 0.5, right)));
-
-    // Camera
-    let look_from = point!(3, 3, 2);
-    let look_at = point!(0, 0, -1);
-    let up = v3!(0, 1, 0);
-    let vertical = 20.0;
-    let aperture = 2.0;
-    let focus_distance = (look_from - look_at).len();
-
-    let camera = Camera::new(
-        look_from,
-        look_at,
-        up,
-        vertical,
-        aspect_ratio,
-        aperture,
-        focus_distance,
-    );
-
-    // Render
-    print!("P3\n{} {}\n255\n", image_width, image_height);
-    for j in (0..(image_height as i32)).rev() {
-        eprintln!("\rScanlines remaining: {} ", j);
-        for i in 0..(image_width as i32) {
-            let mut pixel_color = color!(0, 0, 0);
-            for _ in 0..samples_per_pixel {
-                let u = (i as f64 + f64::random()) / (image_width - 1.0);
-                let v = (j as f64 + f64::random()) / (image_height - 1.0);
-                let ray = camera.get_ray(u, v);
-                pixel_color += ray_color(&ray, &world, max_depth);
-            }
-            pixel_color.write(samples_per_pixel);
-        }
-    }
 }

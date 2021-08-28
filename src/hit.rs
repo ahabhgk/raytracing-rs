@@ -1,7 +1,11 @@
 use crate::{
+    color,
     material::Material,
+    point,
+    random::Random,
     ray::Ray,
-    vec3::{Point, Vec3},
+    sphere::Sphere,
+    vec3::{Color, Point, Vec3},
 };
 
 pub struct HitRecord<'a> {
@@ -55,8 +59,48 @@ impl HitList {
         self.objects.push(object);
     }
 
-    pub fn clear(&mut self) {
-        self.objects.clear();
+    pub fn random_scene() -> Self {
+        let mut scene = Self::new();
+
+        let ground_material = Material::new_lambertian(color!(0.5, 0.5, 0.5));
+        let ground = Sphere::new(point!(0, -1000, 0), 1000.0, ground_material);
+        scene.add(ground);
+
+        for a in -11..11 {
+            for b in -11..11 {
+                let a = f64::from(a);
+                let b = f64::from(b);
+
+                let choose_mat = f64::random();
+                let center = point!(a + 0.9 * f64::random(), 0.2, b + 0.9 * f64::random());
+
+                if (center - point!(4, 0.2, 0)).len() > 0.9 {
+                    let sphere_material = if choose_mat < 0.8 {
+                        let albedo = Color::random() * Color::random();
+                        Material::new_lambertian(albedo)
+                    } else if choose_mat < 0.95 {
+                        let albedo = Color::random_in(color!(0.5), color!(1));
+                        let fuzz = f64::random_in(0.0, 0.5);
+                        Material::new_metal(albedo, fuzz)
+                    } else {
+                        Material::new_dielectric(1.5)
+                    };
+                    let sphere = Sphere::new(center, 0.2, sphere_material);
+                    scene.add(sphere);
+                }
+            }
+        }
+
+        let dielectric = Material::new_dielectric(1.5);
+        scene.add(Sphere::new(point!(0, 1, 0), 1.0, dielectric));
+
+        let lambertian = Material::new_lambertian(color!(0.4, 0.2, 0.1));
+        scene.add(Sphere::new(point!(-4, 1, 0), 1.0, lambertian));
+
+        let metal = Material::new_metal(color!(0.7, 0.6, 0.5), 0.0);
+        scene.add(Sphere::new(point!(4, 1, 0), 1.0, metal));
+
+        scene
     }
 }
 
