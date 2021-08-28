@@ -51,11 +51,17 @@ fn main() {
     world.add(Box::new(Sphere::new(point!(0, -100.5, -1), 100.0, ground)));
     world.add(Box::new(Sphere::new(point!(0, 0, -1), 0.5, center)));
     world.add(Box::new(Sphere::new(point!(-1, 0, -1), 0.5, left.clone())));
-    world.add(Box::new(Sphere::new(point!(-1, 0, -1), -0.4, left)));
+    world.add(Box::new(Sphere::new(point!(-1, 0, -1), -0.45, left)));
     world.add(Box::new(Sphere::new(point!(1, 0, -1), 0.5, right)));
 
     // Camera
-    let camera = Camera::new(aspect_ratio);
+    let camera = Camera::new(
+        point!(-2, 2, 1),
+        point!(0, 0, -1),
+        v3!(0, 1, 0),
+        20.0,
+        aspect_ratio,
+    );
 
     // Render
     print!("P3\n{} {}\n255\n", image_width, image_height);
