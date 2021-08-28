@@ -1,5 +1,6 @@
-use crate::{random::Random, v3};
 use std::ops;
+
+use crate::{random::Random, v3};
 
 pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
     if x < min {
@@ -47,7 +48,7 @@ impl Vec3 {
         *self / Vec3::from(self.len())
     }
 
-    pub fn write(&self, samples_per_pixel: i32) {
+    pub fn to_rgb_string(&self, samples_per_pixel: i32) -> String {
         let num = 256.0;
         let mut r = self.x / f64::from(samples_per_pixel);
         let mut g = self.y / f64::from(samples_per_pixel);
@@ -57,12 +58,12 @@ impl Vec3 {
         g = g.sqrt();
         b = b.sqrt();
 
-        println!(
+        format!(
             "{} {} {}",
             (num * clamp(r, 0.0, 0.999)) as i32,
             (num * clamp(g, 0.0, 0.999)) as i32,
             (num * clamp(b, 0.0, 0.999)) as i32
-        );
+        )
     }
 
     pub fn random_in_unit_sphere() -> Self {

@@ -6,6 +6,8 @@ mod ray;
 mod sphere;
 mod vec3;
 
+use std::{fs, time::Instant};
+
 use crate::camera::Camera;
 use crate::hit::{Hit, HitList};
 use crate::random::Random;
@@ -13,9 +15,10 @@ use crate::ray::Ray;
 use crate::vec3::{Color, Vec3};
 
 // Image
+const DIST: &str = "dist/image.ppm";
 const ASPECT_RATIO: f64 = 3.0 / 2.0;
-const IMAGE_WIDTH: f64 = 1200.0;
-const IMAGE_HEIGHT: f64 = IMAGE_WIDTH / ASPECT_RATIO;
+const IMAGE_WIDTH: usize = 1200;
+const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 const SAMPLES_PER_PIXEL: i32 = 500;
 const MAX_DEPTH: i32 = 50;
 
@@ -42,20 +45,31 @@ fn main() {
     );
 
     // Render
-    print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
-    for j in (0..(IMAGE_HEIGHT as i32)).rev() {
-        eprintln!("\rScanlines remaining: {} ", j);
-        for i in 0..(IMAGE_WIDTH as i32) {
-            let mut pixel_color = color!(0, 0, 0);
+    let header = format!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+    let mut body = Vec::new();
+    let mut remaining = IMAGE_HEIGHT;
+    let start_time = Instant::now();
+
+    for j in (0..IMAGE_HEIGHT).rev() {
+        for i in 0..IMAGE_WIDTH {
+            let mut pixel = color!(0);
             for _ in 0..SAMPLES_PER_PIXEL {
-                let u = (i as f64 + f64::random()) / (IMAGE_WIDTH - 1.0);
-                let v = (j as f64 + f64::random()) / (IMAGE_HEIGHT - 1.0);
+                let u = (i as f64 + f64::random()) / (IMAGE_WIDTH as f64 - 1.0);
+                let v = (j as f64 + f64::random()) / (IMAGE_HEIGHT as f64 - 1.0);
                 let ray = camera.get_ray(u, v);
-                pixel_color += ray_color(&ray, &world, MAX_DEPTH);
+                pixel += ray_color(&ray, &world, MAX_DEPTH);
             }
-            pixel_color.write(SAMPLES_PER_PIXEL);
+            body.push(pixel.to_rgb_string(SAMPLES_PER_PIXEL));
         }
+
+        remaining -= 1;
+        eprintln!("\rScanlines remaining: {} ", remaining);
     }
+
+    eprintln!("tracking completed: {:?}", start_time.elapsed());
+
+    let contents = format!("{}\n{}\n", header, body.join("\n"));
+    fs::write(DIST, contents).expect("write file failed");
 }
 
 fn ray_color<H>(ray: &Ray, world: &H, depth: i32) -> Color

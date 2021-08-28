@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     hit::{Hit, HitRecord},
     material::Material,
@@ -5,7 +7,6 @@ use crate::{
     v3,
     vec3::Point,
 };
-use std::rc::Rc;
 
 pub struct Sphere {
     center: Point,

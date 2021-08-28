@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     color,
     hit::HitRecord,
@@ -5,7 +7,6 @@ use crate::{
     ray::Ray,
     vec3::{Color, Vec3},
 };
-use std::rc::Rc;
 
 pub enum Material {
     Lambertian { albedo: Color },
