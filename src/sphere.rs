@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::{
     hit::{Hit, HitRecord},
@@ -11,11 +11,11 @@ use crate::{
 pub struct Sphere {
     center: Point,
     radius: f64,
-    material: Rc<Material>,
+    material: Arc<Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Point, radius: f64, material: Rc<Material>) -> Box<Self> {
+    pub fn new(center: Point, radius: f64, material: Arc<Material>) -> Box<Self> {
         Box::new(Self {
             center,
             radius,

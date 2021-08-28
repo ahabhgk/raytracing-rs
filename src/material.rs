@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::{
     color,
@@ -15,19 +15,19 @@ pub enum Material {
 }
 
 impl Material {
-    pub fn new_lambertian(albedo: Color) -> Rc<Self> {
-        Rc::new(Self::Lambertian { albedo })
+    pub fn new_lambertian(albedo: Color) -> Arc<Self> {
+        Arc::new(Self::Lambertian { albedo })
     }
 
-    pub fn new_metal(albedo: Color, fuzz: f64) -> Rc<Self> {
-        Rc::new(Self::Metal {
+    pub fn new_metal(albedo: Color, fuzz: f64) -> Arc<Self> {
+        Arc::new(Self::Metal {
             albedo,
             fuzz: if fuzz < 1.0 { fuzz } else { 1.0 },
         })
     }
 
-    pub fn new_dielectric(refraction_index: f64) -> Rc<Self> {
-        Rc::new(Self::Dielectric { refraction_index })
+    pub fn new_dielectric(refraction_index: f64) -> Arc<Self> {
+        Arc::new(Self::Dielectric { refraction_index })
     }
 
     pub fn scatter(&self, ray_in: &Ray, record: &HitRecord) -> Option<(Ray, Color)> {
