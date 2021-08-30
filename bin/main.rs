@@ -1,11 +1,3 @@
-mod camera;
-mod hit;
-mod material;
-mod random;
-mod ray;
-mod sphere;
-mod vec3;
-
 use std::{
     fs,
     ops::Range,
@@ -14,11 +6,7 @@ use std::{
 };
 use threadpool::ThreadPool;
 
-use crate::camera::Camera;
-use crate::hit::{Hit, HitList};
-use crate::random::Random;
-use crate::ray::Ray;
-use crate::vec3::{Color, Vec3};
+use raytracing_rs::{camera::Camera, color, hit::HitList, point, random::Random, v3};
 
 // Image
 const DIST: &str = "dist/image.ppm";
@@ -74,7 +62,7 @@ fn main() {
                     let u = (i as f64 + f64::random()) / (IMAGE_WIDTH as f64 - 1.0);
                     let v = (j as f64 + f64::random()) / (IMAGE_HEIGHT as f64 - 1.0);
                     let ray = camera.get_ray(u, v);
-                    pixel += ray_color(&ray, &*world, MAX_DEPTH);
+                    pixel += ray.to_color(&*world, MAX_DEPTH);
                 }
                 colors.push(pixel.to_rgb_string(SAMPLES_PER_PIXEL));
             }
@@ -99,22 +87,4 @@ fn main() {
 
     let contents = format!("{}\n{}\n", header, body.join("\n"));
     fs::write(DIST, contents).expect("write file failed");
-}
-
-fn ray_color<H>(ray: &Ray, world: &H, depth: i32) -> Color
-where
-    H: Hit,
-{
-    if depth <= 0 {
-        return color!(0, 0, 0);
-    }
-    if let Some(rec) = world.hit(ray, 0.001, f64::INFINITY) {
-        if let Some((ray_out, attenuation)) = rec.material.scatter(ray, &rec) {
-            return attenuation * ray_color(&ray_out, world, depth - 1);
-        }
-        return color!(0);
-    }
-    let unit_dir = ray.direction.unit();
-    let t = 0.5 * (unit_dir.y + 1.0);
-    (1.0 - t) * color!(1, 1, 1) + t * color!(0.5, 0.7, 1)
 }

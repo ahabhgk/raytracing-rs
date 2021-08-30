@@ -300,10 +300,10 @@ pub type Point = Vec3;
 #[macro_export]
 macro_rules! v3 {
     ($f: expr) => {
-        $crate::Vec3::from(f64::from($f))
+        $crate::vec3::Vec3::from(f64::from($f))
     };
     ($x: expr, $y: expr, $z: expr) => {
-        $crate::Vec3::new(f64::from($x), f64::from($y), f64::from($z))
+        $crate::vec3::Vec3::new(f64::from($x), f64::from($y), f64::from($z))
     };
 }
 

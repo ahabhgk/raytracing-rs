@@ -3,8 +3,20 @@ name = "raytracing-rs"
 version = "0.1.0"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "main"
+path = "bin/main.rs"
+
+[[bench]]
+name = "thread"
+harness = false
+
+[profile.bench]
+debug = true
 
 [dependencies]
 rand = "0.8.4"
 threadpool = "1.8.1"
+
+[dev-dependencies]
+criterion = "0.3.5"

@@ -102,6 +102,25 @@ impl HitList {
 
         scene
     }
+
+    pub fn simple_scene() -> Self {
+        let mut scene = Self::new();
+
+        let ground_material = Material::new_lambertian(color!(0.5, 0.5, 0.5));
+        let ground = Sphere::new(point!(0, -1000, 0), 1000.0, ground_material);
+        scene.add(ground);
+
+        let dielectric = Material::new_dielectric(1.5);
+        scene.add(Sphere::new(point!(0, 1, 0), 1.0, dielectric));
+
+        let lambertian = Material::new_lambertian(color!(0.4, 0.2, 0.1));
+        scene.add(Sphere::new(point!(-4, 1, 0), 1.0, lambertian));
+
+        let metal = Material::new_metal(color!(0.7, 0.6, 0.5), 0.0);
+        scene.add(Sphere::new(point!(4, 1, 0), 1.0, metal));
+
+        scene
+    }
 }
 
 impl Hit for HitList {
