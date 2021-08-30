@@ -3,6 +3,7 @@
 multi-thread:
 
 ```shell
+git checkout multi-thread
 cargo run --release # tracking completed: 1797.344342287s
 ```
 
